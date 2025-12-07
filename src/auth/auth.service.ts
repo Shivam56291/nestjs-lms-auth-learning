@@ -1,17 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '@/user/user.service';
-import { RegisterDto } from './dto/registerUser.dto';
-import bcrypt from 'bcrypt';
+import { RegisterDto } from '../user/dto/registerUser.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from '@/user/dto/loginUser.dto';
+import { UserDocument } from '@/user/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async registerUser(registerDto: RegisterDto) {
     const hash = await bcrypt.hash(registerDto.password, 10);
 
-    const user = await this.userService.createUser({ ...registerDto, password: hash });
+    const user = await this.userService.createUser({
+      ...registerDto,
+      password: hash,
+    });
 
-    return user;
+    const payload = { id: user._id };
+    const token = await this.jwtService.signAsync(payload);
+
+    return { token };
   }
+
+  async loginUser(loginDto: LoginDto) {
+  const user: UserDocument | null = await this.userService.findOneByEmail(loginDto.email);
+  
+  if (!user) {
+    throw new UnauthorizedException('Invalid credentials');
+  }
+
+  const isMatch = await bcrypt.compare(loginDto.password, user.password);
+  if (!isMatch) {
+    throw new UnauthorizedException('Invalid credentials');
+  }
+
+  const payload = { id: user._id };
+  const token = await this.jwtService.signAsync(payload);
+
+  return { token };
+}
+
 }
