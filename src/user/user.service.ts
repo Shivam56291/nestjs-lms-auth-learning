@@ -26,6 +26,10 @@ export class UserService {
         throw new ConflictException('User already exists');
       }
       throw error;
-    }
+    } 
+  }
+
+  async getUserById(id: string): Promise<UserDocument | null> {
+    return this.userModel.findById(id).exec();
   }
 }

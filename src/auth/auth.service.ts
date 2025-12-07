@@ -21,28 +21,36 @@ export class AuthService {
       password: hash,
     });
 
-    const payload = { id: user._id };
+    const payload = { id: user._id, email: user.email };
     const token = await this.jwtService.signAsync(payload);
 
     return { token };
   }
 
   async loginUser(loginDto: LoginDto) {
-  const user: UserDocument | null = await this.userService.findOneByEmail(loginDto.email);
-  
-  if (!user) {
-    throw new UnauthorizedException('Invalid credentials');
+    const user: UserDocument | null = await this.userService.findOneByEmail(
+      loginDto.email,
+    );
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isMatch = await bcrypt.compare(loginDto.password, user.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    console.log('User found:', { id: user._id, email: user.email });
+    console.log('JwtService instance:', this.jwtService);
+
+    const payload = { id: user._id, email: user.email };
+    const token = await this.jwtService.signAsync(payload);
+
+    return { token };
   }
 
-  const isMatch = await bcrypt.compare(loginDto.password, user.password);
-  if (!isMatch) {
-    throw new UnauthorizedException('Invalid credentials');
+  async getUserById(id: string): Promise<UserDocument | null> {
+    return this.userService.getUserById(id);
   }
-
-  const payload = { id: user._id };
-  const token = await this.jwtService.signAsync(payload);
-
-  return { token };
-}
-
 }
