@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { Role } from "../user.types";
 
 export class RegisterDto {
   @IsString()
@@ -18,4 +19,8 @@ export class RegisterDto {
   @IsNotEmpty()
   @MinLength(6)
   password!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  role!: Role;
 }

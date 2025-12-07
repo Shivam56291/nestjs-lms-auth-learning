@@ -14,6 +14,7 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { AuthGuard } from '@/auth/auth.guard';
 import { Roles } from '@/auth/roles.decorator';
 import { Role } from '@/user/user.types';
+import { RolesGuard } from '@/auth/roles.guard';
 
 @Controller('courses')
 export class CourseController {
@@ -22,7 +23,7 @@ export class CourseController {
   
   
   @Post()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard,RolesGuard)
   @Roles(Role.ADMIN)
   create(@Body() createCourseDto: CreateCourseDto) {
     return this.courseService.create(createCourseDto);
@@ -39,6 +40,7 @@ export class CourseController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard,RolesGuard)
   @Roles(Role.ADMIN)
   update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
     return this.courseService.update(+id, updateCourseDto);
