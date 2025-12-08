@@ -20,15 +20,15 @@ export class CourseService {
     return this.courseModel.find().exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} course`;
+  async findOne(id: string) {
+    return await this.courseModel.findById(id).exec();
   }
 
-  update(id: number, updateCourseDto: UpdateCourseDto) {
-    return `This action updates a #${id} course`;
+  async update(id: string, updateCourseDto: UpdateCourseDto) {
+    return await this.courseModel.findByIdAndUpdate(id, updateCourseDto).exec();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} course`;
+  async remove(id: string) {
+    return await this.courseModel.findByIdAndDelete(id).exec();
   }
 }
